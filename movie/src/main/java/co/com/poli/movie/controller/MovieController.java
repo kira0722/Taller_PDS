@@ -53,6 +53,10 @@ public class MovieController {
 
     @GetMapping("/{id}")
     public Response findById(@PathVariable Long id){
+        Movie movie = movieService.findById(id);
+        if(movie == null){
+            return build.success("el usuario no existe");
+        }
         return build.success(movieService.findById(id));
     }
 
