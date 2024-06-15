@@ -1,14 +1,13 @@
-package co.com.poli.users;
+package co.com.poli.movie;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-public class UsersApplication {
+public class MovieApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UsersApplication.class, args);
+		SpringApplication.run(MovieApplication.class, args);
 	}
 
 }

@@ -1,11 +1,11 @@
-package co.com.poli.users.controller;
+package co.com.poli.movie.controller;
 
 
-import co.com.poli.users.helper.Response;
-import co.com.poli.users.helper.ResponseBuild;
-import co.com.poli.users.persistence.entity.User;
-import co.com.poli.users.service.DTO.UserDTO;
-import co.com.poli.users.service.UserService;
+import co.com.poli.movie.helper.Response;
+import co.com.poli.movie.helper.ResponseBuild;
+import co.com.poli.movie.persistence.entity.Movie;
+import co.com.poli.movie.service.DTO.MovieDTO;
+import co.com.poli.movie.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.BindingResult;
@@ -20,50 +20,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/movies")
 @RequiredArgsConstructor
-public class UserController {
-
-    private final UserService userService;
+public class MovieController {
+    private final MovieService movieService;
     private final ResponseBuild build;
 
-
-    private User convertToEntity(UserDTO userDTO) {
-        User user = new User();
-        user.setName(userDTO.getName());
-        user.setLastname(userDTO.getLast_name());
-        return user;
+    private Movie convertToEntity(MovieDTO movieDTO) {
+        Movie movie = new Movie();
+        movie.setDirector(movieDTO.getDirector());
+        movie.setTitle(movieDTO.getTitle());
+        movie.setRating(movieDTO.getRating());
+        return movie;
     }
 
-
-
     @PostMapping
-    public Response save(@Valid @RequestBody UserDTO userdto, BindingResult result){
+    public Response save(@Valid @RequestBody MovieDTO movieDTO, BindingResult result){
         if(result.hasErrors()){
             return build.success(format(result));
         }
-        User user = convertToEntity(userdto);
-        userService.save(user);
-        return build.success(user);
+        Movie movie = convertToEntity(movieDTO);
+        movieService.save(movie);
+        return build.success(movie);
     }
 
     @GetMapping
     public Response findAll(){
-        return build.success(userService.findAll());
+        return build.success(movieService.findAll());
     }
 
+
+    @GetMapping("/{id}")
+    public Response findById(@PathVariable Long id){
+        return build.success(movieService.findById(id));
+    }
 
     @DeleteMapping("/{id}")
     public Response delete(@PathVariable("id") Long id){
-        User user = (User) userService.findById(id);
-        if(user==null){
+        Movie movie = (Movie) movieService.findById(id);
+        if(movie==null){
             return build.success("El usuario a eliminar no existe");
         }
-        userService.delete(user);
-        return build.success(user);
+        movieService.delete(movie);
+        return build.success(movie);
     }
+
+
 
 
     private List<Map<String,String>> format(BindingResult result){
@@ -74,4 +77,5 @@ public class UserController {
                     return err;
                 }).collect(Collectors.toList());
     }
+
 }

@@ -2,7 +2,6 @@ package co.com.poli.users.service;
 
 import co.com.poli.users.persistence.entity.User;
 import co.com.poli.users.persistence.repository.UserRepository;
-import co.com.poli.users.service.DTO.userDTO;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
