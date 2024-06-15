@@ -1,0 +1,17 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:///C:/Users/SAMUEL/Desktop/Taller_pds/servicios-config
+  security:
+    user:
+      name: ${CONFIG_NAME}
+      password: ${CONFIG_PASSWORD}
+
+
+
