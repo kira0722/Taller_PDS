@@ -16,21 +16,15 @@ import java.util.Objects;
 @Setter
 public class Booking {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true)
-    @NotNull
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userID;
+    private Long userId;
 
-    @Column(name = "showtime_id")
-    private Long showtimeID;
+    private Long showtimeId;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "showtimes_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private List<BookingItem> movies;
+    private Long movieId;
 
     @Override
     public boolean equals(Object o) {

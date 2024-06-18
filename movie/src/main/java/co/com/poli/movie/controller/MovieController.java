@@ -3,10 +3,11 @@ package co.com.poli.movie.controller;
 
 import co.com.poli.movie.helper.Response;
 import co.com.poli.movie.helper.ResponseBuild;
+import co.com.poli.movie.model.Showtime;
 import co.com.poli.movie.persistence.entity.Movie;
 import co.com.poli.movie.service.DTO.MovieDTO;
 import co.com.poli.movie.service.MovieService;
-import jakarta.persistence.EntityNotFoundException;
+import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +19,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/movies")
 @RequiredArgsConstructor
 public class MovieController {
-    @Autowired
-    private  MovieService movieService;
+    private final MovieService movieService;
     private final ResponseBuild responseBuild;
+
 
     private Movie convertToEntity(MovieDTO movieDTO) {
         Movie movie = new Movie();
@@ -51,15 +54,9 @@ public class MovieController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
-        try {
-            movieService.delete(id);
-            return ResponseEntity.ok("Movie deleted successfully");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
+        movieService.deleteMovie(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

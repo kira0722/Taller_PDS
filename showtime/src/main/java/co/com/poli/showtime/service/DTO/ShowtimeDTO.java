@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class ShowtimeDTO {
-
     private LocalDateTime date;
     private Long movieId;
-
 }

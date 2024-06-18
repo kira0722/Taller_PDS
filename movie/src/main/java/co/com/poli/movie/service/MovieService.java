@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface MovieService {
     void save(Movie movie);
-    void delete(Long movieId);
+    void deleteMovie(Long movieId);
     List<Movie> findAll();
     Movie getMovieById(Long id);
 

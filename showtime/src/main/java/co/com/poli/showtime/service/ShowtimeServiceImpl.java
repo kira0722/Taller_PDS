@@ -3,14 +3,10 @@ package co.com.poli.showtime.service;
 import co.com.poli.showtime.clientFeign.MovieClient;
 import co.com.poli.showtime.model.Movie;
 import co.com.poli.showtime.persistence.entity.ShowtimeDetails;
-import jakarta.persistence.Access;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 
 import co.com.poli.showtime.persistence.entity.Showtime;
@@ -24,7 +20,6 @@ import java.util.stream.Collectors;
 public class ShowtimeServiceImpl implements ShowtimeService{
     @Autowired
     private MovieClient movieClient;
-//    private final CircuitBreakerFactory factory;
     @Autowired
     private  ShowtimeRepository showtimeRepository;
 
@@ -61,21 +56,14 @@ public class ShowtimeServiceImpl implements ShowtimeService{
     }
 
     @Override
-    public void delete(Showtime showtime) {
-        showtimeRepository.delete(showtime);
-    }
-
-//    @Override
-//    public Showtime findById(Long id) {
-//        ModelMapper modelMapper = new ModelMapper();
-//        return showtimeRepository.findById(id).orElse(null);
-//    }
-
-
-    @Override
     public ShowtimeDetails getShowtimeDetails(Long id) {
         Showtime showtime = showtimeRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("no encontrado"));
         Movie movie = movieClient.getMovieById(showtime.getMovieId());
         return new ShowtimeDetails(showtime.getId(), showtime.getDate(), movie.getId(), movie.getTitle(), movie.getDirector(), movie.getRating());
+    }
+
+    @Override
+    public boolean existsByMovieId(Long movieId) {
+        return showtimeRepository.existsByMovieId(movieId);
     }
 }

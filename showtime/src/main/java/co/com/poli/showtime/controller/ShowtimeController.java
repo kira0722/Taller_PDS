@@ -1,6 +1,5 @@
 package co.com.poli.showtime.controller;
 
-import co.com.poli.showtime.helper.Response;
 import co.com.poli.showtime.helper.ResponseBuild;
 import co.com.poli.showtime.persistence.entity.Showtime;
 import co.com.poli.showtime.persistence.entity.ShowtimeDetails;
@@ -11,20 +10,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/showtimes")
 @RequiredArgsConstructor
 public class ShowtimeController {
+
     @Autowired
     private ShowtimeService showtimeService;
+
     private final ResponseBuild responseBuild;
 
     private Showtime convertToEntity(ShowtimeDTO showtimeDTO) {
@@ -48,25 +45,22 @@ public class ShowtimeController {
     }
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ShowtimeDetails> getShowtimeDetails(@PathVariable Long id) {
+    @GetMapping("{id}")
+    public ResponseEntity<ShowtimeDetails> getShowtimeDetails(@PathVariable("id") Long id) {
         ShowtimeDetails showtimeDetails = showtimeService.getShowtimeDetails(id);
         return ResponseEntity.ok(showtimeDetails);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Showtime> updateShowtime(@PathVariable Long id, @RequestBody Showtime updatedShowtime) {
+    public ResponseEntity<Showtime> updateShowtime(@PathVariable("id") Long id, @RequestBody Showtime updatedShowtime) {
         Showtime updated = showtimeService.updateShowtime(id, updatedShowtime);
         return ResponseEntity.ok(updated);
     }
 
-    private List<Map<String, String>> format(BindingResult result) {
-        return result.getFieldErrors().stream()
-                .map(error -> {
-                    Map<String, String> newError = new HashMap<>();
-                    newError.put(error.getField(), error.getDefaultMessage());
-                    return newError;
-                }).collect(Collectors.toList());
+    @GetMapping("/existsByMovieId")
+    public ResponseEntity<Boolean> existsByMovieId(@RequestParam Long movieId) {
+        boolean exists = showtimeService.existsByMovieId(movieId);
+        return ResponseEntity.ok(exists);
     }
 
 

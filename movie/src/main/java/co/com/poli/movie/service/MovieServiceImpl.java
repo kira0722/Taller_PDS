@@ -1,13 +1,12 @@
 package co.com.poli.movie.service;
 
 
-import co.com.poli.movie.feign.ShowtimeClient;
-import co.com.poli.movie.helper.ResponseBuild;
+import co.com.poli.movie.Feign.BookingClient;
+import co.com.poli.movie.Feign.ShowtimeClient;
 import co.com.poli.movie.model.Showtime;
 import co.com.poli.movie.persistence.entity.Movie;
 import co.com.poli.movie.persistence.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,11 @@ public class MovieServiceImpl implements MovieService {
     private MovieRepository movieRepository;
 
     @Autowired
+    private BookingClient bookingClient;
+
+    @Autowired
     private ShowtimeClient showtimeClient;
+
 
 
     @Override
@@ -32,18 +35,20 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Transactional
-    public void delete(Long movieId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
-
-        // Verificar si hay showtimes asociados a esta película
-        List<Showtime> showtimes = showtimeClient.getShowtimesByMovieId(movieId);
-        if (!showtimes.isEmpty()) {
-            throw new IllegalStateException("Cannot delete movie with id " + movieId + " because it has associated showtimes.");
+    public void deleteMovie(Long movieId) {
+        // Verificar si existen programaciones asociadas a la película
+        boolean hasShowtimes = showtimeClient.existsByMovieId(movieId);
+        if (hasShowtimes) {
+            throw new RuntimeException("No se puede eliminar la película porque tiene programaciones asociadas");
         }
 
-        // Si no hay showtimes asociados, procede con la eliminación
-        movieRepository.delete(movie);
+        // Verificar si existen reservas asociadas a la película
+        boolean hasBookings = bookingClient.existsByMovieId(movieId);
+        if (hasBookings) {
+            throw new RuntimeException("No se puede eliminar la película porque tiene reservas asociadas");
+        }
+
+        movieRepository.deleteById(movieId);
     }
 
     @Override

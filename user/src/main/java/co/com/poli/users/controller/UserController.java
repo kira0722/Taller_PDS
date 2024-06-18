@@ -58,15 +58,17 @@ public class UserController {
         return this.responseBuild.success(usuarios);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getMovieById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> delete(@PathVariable("id") Long id) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
-            userService.deleteById(id);
-            return ResponseEntity.status(200).body(responseBuild.success("User deleted successfully"));
-        }
-        return ResponseEntity.status(200).body(responseBuild.failed("User not found"));
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     private List<Map<String, String>> format(BindingResult result) {
