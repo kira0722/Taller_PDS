@@ -3,10 +3,14 @@ package co.com.poli.showtime.controller;
 import co.com.poli.showtime.helper.Response;
 import co.com.poli.showtime.helper.ResponseBuild;
 import co.com.poli.showtime.persistence.entity.Showtime;
+import co.com.poli.showtime.persistence.entity.ShowtimeDetails;
 import co.com.poli.showtime.service.DTO.ShowtimeDTO;
 import co.com.poli.showtime.service.ShowtimeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,57 +23,51 @@ import java.util.stream.Collectors;
 @RequestMapping("/showtimes")
 @RequiredArgsConstructor
 public class ShowtimeController {
-    private final ShowtimeService service;
-    private final ResponseBuild build;
+    @Autowired
+    private ShowtimeService showtimeService;
+    private final ResponseBuild responseBuild;
 
     private Showtime convertToEntity(ShowtimeDTO showtimeDTO) {
         Showtime showtime = new Showtime();
         showtime.setDate(showtimeDTO.getDate());
+        showtime.setMovieId(showtimeDTO.getMovieId());
         return showtime;
     }
 
     @PostMapping
-    public Response save(@Valid @RequestBody ShowtimeDTO showtimeDTO, BindingResult result){
-        if(result.hasErrors()){
-            return build.success(format(result));
-        }
+    public ResponseEntity<Showtime> createShowtime(@Valid @RequestBody ShowtimeDTO showtimeDTO) {
         Showtime showtime = convertToEntity(showtimeDTO);
-        service.save(showtime);
-        return build.success(showtime);
+        Showtime createdShowtime = showtimeService.createShowtime(showtime);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdShowtime);
     }
 
-    @GetMapping
-    public Response findAll(){
-        return build.success(service.findAll());
+    @GetMapping("/details")
+    public ResponseEntity<List<ShowtimeDetails>> getAllShowtimesWithMovies() {
+        List<ShowtimeDetails> showtimesWithMovies = showtimeService.getAllShowtimesWithMovies();
+        return ResponseEntity.ok(showtimesWithMovies);
     }
+
 
     @GetMapping("/{id}")
-    public Response findById(@PathVariable Long id){
-        Showtime showtime = service.findById(id);
-        if(showtime == null){
-            return build.success("el usuario no existe");
-        }
-        return build.success(service.findById(id));
+    public ResponseEntity<ShowtimeDetails> getShowtimeDetails(@PathVariable Long id) {
+        ShowtimeDetails showtimeDetails = showtimeService.getShowtimeDetails(id);
+        return ResponseEntity.ok(showtimeDetails);
     }
 
-    @DeleteMapping("/{id}")
-    public Response delete(@PathVariable("id") Long id){
-        Showtime showtime = (Showtime) service.findById(id);
-        if(showtime==null){
-            return build.success("El usuario a eliminar no existe");
-        }
-        service.delete(showtime);
-        return build.success(showtime);
+    @PutMapping("/{id}")
+    public ResponseEntity<Showtime> updateShowtime(@PathVariable Long id, @RequestBody Showtime updatedShowtime) {
+        Showtime updated = showtimeService.updateShowtime(id, updatedShowtime);
+        return ResponseEntity.ok(updated);
     }
 
-
-    private List<Map<String,String>> format(BindingResult result){
-        return result.getFieldErrors()
-                .stream().map(error -> {
-                    Map<String,String> err = new HashMap<>();
-                    err.put(error.getField(),error.getDefaultMessage());
-                    return err;
+    private List<Map<String, String>> format(BindingResult result) {
+        return result.getFieldErrors().stream()
+                .map(error -> {
+                    Map<String, String> newError = new HashMap<>();
+                    newError.put(error.getField(), error.getDefaultMessage());
+                    return newError;
                 }).collect(Collectors.toList());
     }
+
 
 }

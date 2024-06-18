@@ -12,7 +12,6 @@ public class ResponseBuild {
     public Response success(Object data){
         return Response.builder().code(HttpStatus.OK.value()).data(data).build();
     }
-
     public Response failed(){
         return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build();
     }

@@ -1,40 +1,81 @@
 package co.com.poli.showtime.service;
 
+import co.com.poli.showtime.clientFeign.MovieClient;
+import co.com.poli.showtime.model.Movie;
+import co.com.poli.showtime.persistence.entity.ShowtimeDetails;
+import jakarta.persistence.Access;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.expression.ExpressionException;
+import org.springframework.stereotype.Service;
 
 import co.com.poli.showtime.persistence.entity.Showtime;
 import co.com.poli.showtime.persistence.repository.ShowtimeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ShowtimeServiceImpl implements ShowtimeService{
-    private final ShowtimeRepository showtimeRepository;
+    @Autowired
+    private MovieClient movieClient;
+//    private final CircuitBreakerFactory factory;
+    @Autowired
+    private  ShowtimeRepository showtimeRepository;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void save(Showtime showtime) {
-        showtimeRepository.save(showtime);
+    public Showtime createShowtime(Showtime showtime) {
+        movieClient.getMovieById(showtime.getMovieId());
+        return showtimeRepository.save(showtime);
+    }
+
+    public List<ShowtimeDetails> getAllShowtimesWithMovies() {
+        List<Showtime> showtimes = showtimeRepository.findAll();
+        return showtimes.stream()
+                .map(showtime -> {
+                    Movie movie = movieClient.getMovieById(showtime.getMovieId());
+                    return new ShowtimeDetails(showtime.getId(), showtime.getDate(), movie.getId(), movie.getTitle(), movie.getDirector(), movie.getRating());
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Showtime updateShowtime(Long showtimeId, Showtime updatedShowtime) {
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new EntityNotFoundException("Showtime not found with id: " + showtimeId));
+
+        showtime.setDate(updatedShowtime.getDate());
+        showtime.setMovieId(updatedShowtime.getMovieId());
+        // Puedes actualizar otros campos de Showtime aquí según sea necesario
+
+        if (updatedShowtime.getMovieId() != null) {
+            showtime.setMovieId(updatedShowtime.getMovieId());
+        }
+
+        return showtimeRepository.save(showtime);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void delete(Showtime showtime) {
         showtimeRepository.delete(showtime);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Showtime> findAll() {
-        return showtimeRepository.findAll();
-    }
+//    @Override
+//    public Showtime findById(Long id) {
+//        ModelMapper modelMapper = new ModelMapper();
+//        return showtimeRepository.findById(id).orElse(null);
+//    }
+
 
     @Override
-    @Transactional(readOnly = true)
-    public Showtime findById(Long id) {
-        return showtimeRepository.findById(id).orElse(null);
+    public ShowtimeDetails getShowtimeDetails(Long id) {
+        Showtime showtime = showtimeRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("no encontrado"));
+        Movie movie = movieClient.getMovieById(showtime.getMovieId());
+        return new ShowtimeDetails(showtime.getId(), showtime.getDate(), movie.getId(), movie.getTitle(), movie.getDirector(), movie.getRating());
     }
 }

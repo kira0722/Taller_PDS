@@ -6,8 +6,12 @@ import co.com.poli.movie.helper.ResponseBuild;
 import co.com.poli.movie.persistence.entity.Movie;
 import co.com.poli.movie.service.DTO.MovieDTO;
 import co.com.poli.movie.service.MovieService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,54 +28,50 @@ import java.util.stream.Collectors;
 @RequestMapping("/movies")
 @RequiredArgsConstructor
 public class MovieController {
-    private final MovieService movieService;
-    private final ResponseBuild build;
+    @Autowired
+    private  MovieService movieService;
+    private final ResponseBuild responseBuild;
 
     private Movie convertToEntity(MovieDTO movieDTO) {
         Movie movie = new Movie();
-        movie.setDirector(movieDTO.getDirector());
         movie.setTitle(movieDTO.getTitle());
+        movie.setDirector(movieDTO.getDirector());
         movie.setRating(movieDTO.getRating());
         return movie;
     }
 
     @PostMapping
-    public Response save(@Valid @RequestBody MovieDTO movieDTO, BindingResult result){
-        if(result.hasErrors()){
-            return build.success(format(result));
+    public Response save(@Valid @RequestBody MovieDTO movieDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return responseBuild.failed(format(result));
         }
         Movie movie = convertToEntity(movieDTO);
         movieService.save(movie);
-        return build.success(movie);
-    }
-
-    @GetMapping
-    public Response findAll(){
-        return build.success(movieService.findAll());
-    }
-
-
-    @GetMapping("/{id}")
-    public Response findById(@PathVariable Long id){
-        Movie movie = movieService.findById(id);
-        if(movie == null){
-            return build.success("el usuario no existe");
-        }
-        return build.success(movieService.findById(id));
+        return responseBuild.success(movie);
     }
 
     @DeleteMapping("/{id}")
-    public Response delete(@PathVariable("id") Long id){
-        Movie movie = (Movie) movieService.findById(id);
-        if(movie==null){
-            return build.success("El usuario a eliminar no existe");
+    public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
+        try {
+            movieService.delete(id);
+            return ResponseEntity.ok("Movie deleted successfully");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-        movieService.delete(movie);
-        return build.success(movie);
     }
 
+    @GetMapping
+    public Response findAll() {
+        return responseBuild.success(movieService.findAll());
+    }
 
-
+    @GetMapping("/{id}")
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        Movie movie = movieService.getMovieById(id);
+        return ResponseEntity.ok(movie);
+    }
 
     private List<Map<String,String>> format(BindingResult result){
         return result.getFieldErrors()
@@ -81,5 +81,6 @@ public class MovieController {
                     return err;
                 }).collect(Collectors.toList());
     }
+
 
 }

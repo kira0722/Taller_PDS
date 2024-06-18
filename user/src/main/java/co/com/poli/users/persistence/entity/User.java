@@ -3,6 +3,7 @@ package co.com.poli.users.persistence.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,14 +16,18 @@ import java.util.Objects;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @NotNull
+    @Column(name = "id", unique = true)
     private Long id;
+
     @Column(name = "name")
     @NotEmpty(message = "no puede estar vacio")
     private String name;
+
     @Column(name = "last_name")
     @NotEmpty(message = "no puede estar vacio")
-    private String lastname;
+    private String last_name;
 
 
     @Override

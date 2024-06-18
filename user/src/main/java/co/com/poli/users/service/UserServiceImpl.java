@@ -2,38 +2,35 @@ package co.com.poli.users.service;
 
 import co.com.poli.users.persistence.entity.User;
 import co.com.poli.users.persistence.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void save(User user) {
         userRepository.save(user);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void delete(User user) {
-        userRepository.delete(user);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
     }
 }

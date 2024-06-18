@@ -2,10 +2,13 @@ package co.com.poli.showtime.service.DTO;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Data
 public class ShowtimeDTO {
-    private Date date;
-    private Long MovieId;
+
+    private LocalDateTime date;
+    private Long movieId;
+
 }

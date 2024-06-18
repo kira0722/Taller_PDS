@@ -8,6 +8,8 @@ import co.com.poli.users.service.DTO.UserDTO;
 import co.com.poli.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -27,51 +30,52 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final ResponseBuild build;
+
+    private final ResponseBuild responseBuild;
 
 
     private User convertToEntity(UserDTO userDTO) {
         User user = new User();
         user.setName(userDTO.getName());
-        user.setLastname(userDTO.getLast_name());
+        user.setLast_name(userDTO.getLast_name());
         return user;
     }
 
-
-
     @PostMapping
-    public Response save(@Valid @RequestBody UserDTO userdto, BindingResult result){
-        if(result.hasErrors()){
-            return build.success(format(result));
+    public Response save(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            List<Map<String, String>> errors = format(result);
+            return this.responseBuild.failed(errors);
         }
-        User user = convertToEntity(userdto);
+        User user = convertToEntity(userDTO);
         userService.save(user);
-        return build.success(user);
+        return responseBuild.success(user);
     }
 
     @GetMapping
-    public Response findAll(){
-        return build.success(userService.findAll());
+    public Response findAll() {
+        List<User> usuarios = this.userService.findAll();
+        return this.responseBuild.success(usuarios);
     }
 
 
     @DeleteMapping("/{id}")
-    public Response delete(@PathVariable("id") Long id){
-        User user = (User) userService.findById(id);
-        if(user==null){
-            return build.success("El usuario a eliminar no existe");
+    public ResponseEntity<Response> delete(@PathVariable("id") Long id) {
+        Optional<User> user = userService.getUserById(id);
+        if (user.isPresent()) {
+            userService.deleteById(id);
+            return ResponseEntity.status(200).body(responseBuild.success("User deleted successfully"));
         }
-        userService.delete(user);
-        return build.success(user);
+        return ResponseEntity.status(200).body(responseBuild.failed("User not found"));
     }
 
-
-    private List<Map<String,String>> format(BindingResult result){
-        return result.getFieldErrors()
-                .stream().map(error -> {
-                    Map<String,String> err = new HashMap<>();
-                    err.put(error.getField(),error.getDefaultMessage());
-                    return err;
+    private List<Map<String, String>> format(BindingResult result) {
+        return result.getFieldErrors().stream()
+                .map(error -> {
+                    Map<String, String> newError = new HashMap<>();
+                    newError.put(error.getField(), error.getDefaultMessage());
+                    return newError;
                 }).collect(Collectors.toList());
     }
 }
+
