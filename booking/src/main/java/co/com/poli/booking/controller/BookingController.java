@@ -56,13 +56,13 @@ public class BookingController {
 
     @GetMapping("/existsByMovieId")
     public ResponseEntity<Boolean> existsByMovieId(@RequestParam Long movieId) {
-        boolean exists = bookingService.existsByMovieId(movieId);
+        Boolean exists = bookingService.existsByMovieId(movieId);
         return ResponseEntity.ok(exists);
     }
 
     @GetMapping("/existsByUserId")
     public ResponseEntity<Boolean> existsByUserId(@RequestParam Long userId) {
-        boolean exists = bookingService.existsByUserId(userId);
+        Boolean exists = bookingService.existsByUserId(userId);
         return ResponseEntity.ok(exists);
     }
 }

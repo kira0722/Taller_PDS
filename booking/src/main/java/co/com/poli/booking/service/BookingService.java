@@ -11,6 +11,6 @@ public interface BookingService {
     BookingDetails getBookingsDetails(Long id);
     void deleteBooking (Long id);
     List<Booking> getBookingsByUserId(Long id);
-    boolean existsByMovieId(Long movieId);
-    boolean existsByUserId(Long userId);
+    Boolean existsByMovieId(Long movieId);
+    Boolean existsByUserId(Long userId);
 }

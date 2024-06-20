@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ShowtimeRepository extends JpaRepository<Showtime, Long>{
-    boolean existsByMovieId(Long movieId);}
+    boolean existsByMovieId(Long movieId);
+}

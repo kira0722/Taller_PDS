@@ -37,13 +37,13 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     public void deleteMovie(Long movieId) {
         // Verificar si existen programaciones asociadas a la película
-        boolean hasShowtimes = showtimeClient.existsByMovieId(movieId);
+        Boolean hasShowtimes = showtimeClient.existsByMovieId(movieId);
         if (hasShowtimes) {
             throw new RuntimeException("No se puede eliminar la película porque tiene programaciones asociadas");
         }
 
         // Verificar si existen reservas asociadas a la película
-        boolean hasBookings = bookingClient.existsByMovieId(movieId);
+        Boolean hasBookings = bookingClient.existsByMovieId(movieId);
         if (hasBookings) {
             throw new RuntimeException("No se puede eliminar la película porque tiene reservas asociadas");
         }

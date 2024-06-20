@@ -13,6 +13,7 @@ import co.com.poli.booking.persistence.repository.BookingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +26,14 @@ public class BookingServiceImpl implements BookingService{
 
     private final BookingRepository bookingRepository;
 
-    private final MovieClient movieClient;
+    @Autowired
+    private  MovieClient movieClient;
 
-    private final ShowtimeClient showtimeClient;
+    @Autowired
+    private  ShowtimeClient showtimeClient;
 
-    private final UserClient userClient;
+    @Autowired
+    private UserClient userClient;
 
     public Booking createBooking(Long bookingId,Long userId, Long showtimeId, Long movieId){
         User user = userClient.getUserById(userId);
@@ -93,12 +97,12 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public boolean existsByMovieId(Long movieId) {
+    public Boolean existsByMovieId(Long movieId) {
         return bookingRepository.existsByMovieId(movieId);
     }
 
     @Override
-    public boolean existsByUserId(Long userId) {
+    public Boolean existsByUserId(Long userId) {
         return bookingRepository.existsByUserId(userId);
     }
 }

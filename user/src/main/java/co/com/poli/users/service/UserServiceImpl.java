@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,11 +37,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long userId) {
         // Verificar si existen reservas asociadas al usuario
-        boolean hasBookings = bookingClient.existsByUserId(userId);
+        Boolean hasBookings = bookingClient.existsByUserId(userId);
         if (hasBookings) {
             throw new RuntimeException("No se puede eliminar el usuario porque tiene reservas asociadas");
         }
-
         userRepository.deleteById(userId);
     }
 }

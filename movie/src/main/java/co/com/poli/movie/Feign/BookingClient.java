@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "booking")
 public interface BookingClient {
     @GetMapping("api/v1/poli/bookings/existsByMovieId")
-    boolean existsByMovieId(@RequestParam("movieId") Long movieId);
+    Boolean existsByMovieId(@RequestParam("movieId") Long movieId);
 }
